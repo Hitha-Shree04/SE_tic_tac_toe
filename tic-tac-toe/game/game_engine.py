@@ -23,22 +23,42 @@ COMPUTER_SYMBOL = 'O'
 
 class GameEngine:
     def __init__(self):
+        self.scores = {'X': 0, 'O': 0, 'Draws': 0}
+        self.starting_player = HUMAN_SYMBOL
+        self.start_new_round()
+
+    def start_new_round(self):
         self.board = [[None] * 3 for _ in range(3)]
-        self.current_player = 'X'
+        self.current_player = self.starting_player
         self.round_over = False
-        self.winner = None   # 'X', 'O', or None (meaning draw, only valid when round_over)
+        self.winner = None
+        self._maybe_take_computer_turn()
+
+    def reset_match(self):
+        self.scores = {'X': 0, 'O': 0, 'Draws': 0}
+        self.starting_player = HUMAN_SYMBOL
+        self.start_new_round()
+
+    def toggle_starting_player(self):
+        self.starting_player = COMPUTER_SYMBOL if self.starting_player == HUMAN_SYMBOL else HUMAN_SYMBOL
 
     def handle_click(self, pos):
+        if self.round_over:
+            return
         if self.current_player != HUMAN_SYMBOL:
-            return   # not your turn - the computer is about to move (or already has)
+            return
         cell = board_pos_to_cell(pos)
         if cell is None:
             return
         row, col = cell
-        self.board[row][col] = self.current_player   # BUG: doesn't check if the cell is already occupied
+        if self.board[row][col] is not None:
+            return  # Cell is already occupied, reject click without turn advancement
+
+        self.board[row][col] = self.current_player
         self.check_round_end()
-        self.current_player = 'O' if self.current_player == 'X' else 'X'
-        self._maybe_take_computer_turn()
+        if not self.round_over:
+            self.current_player = COMPUTER_SYMBOL
+            self._maybe_take_computer_turn()
 
     def _maybe_take_computer_turn(self):
         if self.round_over or self.current_player != COMPUTER_SYMBOL:
@@ -49,29 +69,55 @@ class GameEngine:
         row, col = move
         self.board[row][col] = self.current_player
         self.check_round_end()
-        self.current_player = 'O' if self.current_player == 'X' else 'X'
+        if not self.round_over:
+            self.current_player = HUMAN_SYMBOL
 
     def handle_keydown(self, key):
         import pygame
         if key == pygame.K_r:
-            self.__init__()
+            self.start_new_round()
+        elif key == pygame.K_m:
+            self.reset_match()
+        elif key in (pygame.K_x, pygame.K_o, pygame.K_s):
+            if key == pygame.K_x:
+                self.starting_player = 'X'
+            elif key == pygame.K_o:
+                self.starting_player = 'O'
+            else:
+                self.toggle_starting_player()
 
     def check_round_end(self):
-        if is_board_full(self.board):        # BUG: checked before looking for a winner
-            self.round_over = True
-            self.winner = None
-            return
         winner = check_winner(self.board)
         if winner:
             self.round_over = True
             self.winner = winner
+            self.scores[winner] += 1
+            return
+
+        if is_board_full(self.board):
+            self.round_over = True
+            self.winner = None
+            self.scores['Draws'] += 1
+            return
 
     def draw(self, surface, font):
         from game import renderer
         renderer.draw_board(surface, self.board)
-        turn_label = "Your turn (X)" if self.current_player == HUMAN_SYMBOL else "Computer's turn (O)"
-        renderer.draw_text(surface, font, turn_label, (10, 20))
 
+        # Persistent Scoreboard at top
+        score_text = f"X: {self.scores['X']}   O: {self.scores['O']}   Draws: {self.scores['Draws']}"
+        renderer.draw_text(surface, font, score_text, (10, 10))
+
+        # Current Turn / Status & Starting player info
+        if not self.round_over:
+            turn_label = "Your turn (X)" if self.current_player == HUMAN_SYMBOL else "Computer's turn (O)"
+        else:
+            turn_label = f"{self.winner} wins!" if self.winner else "Round ended in a Draw!"
+        renderer.draw_text(surface, font, turn_label, (10, 42))
+
+        # Banner / Controls guide at bottom
         if self.round_over:
-            text = f"{self.winner} wins!" if self.winner else "Draw!"
-            renderer.draw_banner(surface, font, f"{text} Press R for a new round.")
+            renderer.draw_banner(surface, font, "R: New Round | M: Reset Match")
+        else:
+            renderer.draw_banner(surface, font, f"Next round starts: {self.starting_player} (X/O/S to set)", color=(80, 80, 80))
+

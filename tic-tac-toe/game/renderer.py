@@ -4,10 +4,10 @@ renderer: all pygame drawing lives here, kept separate from game logic.
 
 import pygame
 
-WIDTH, HEIGHT = 400, 500
+WIDTH, HEIGHT = 400, 520
 BOARD_SIZE = 360
 CELL_SIZE = BOARD_SIZE // 3
-BOARD_TOP = 100
+BOARD_TOP = 80
 WINDOW_SIZE = (WIDTH, HEIGHT)
 
 COLOR_BG = (245, 245, 245)
@@ -15,6 +15,7 @@ COLOR_LINE = (60, 60, 60)
 COLOR_X = (200, 60, 60)
 COLOR_O = (60, 100, 200)
 COLOR_TEXT = (30, 30, 30)
+COLOR_MUTED = (100, 100, 100)
 
 
 def board_pos_to_cell(pos):
@@ -51,7 +52,8 @@ def draw_text(surface, font, text, pos, color=COLOR_TEXT):
     surface.blit(font.render(text, True, color), pos)
 
 
-def draw_banner(surface, font, text):
-    surf = font.render(text, True, (180, 40, 40))
-    rect = surf.get_rect(center=(surface.get_width() // 2, BOARD_TOP + BOARD_SIZE + 40))
+def draw_banner(surface, font, text, color=(180, 40, 40)):
+    surf = font.render(text, True, color)
+    rect = surf.get_rect(center=(surface.get_width() // 2, BOARD_TOP + BOARD_SIZE + 24))
     surface.blit(surf, rect)
+
