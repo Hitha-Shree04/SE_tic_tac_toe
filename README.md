@@ -139,6 +139,15 @@ tic-tac-toe/
 
 Submission is only the following three things:
 
-- [ ] A 10-second video of gameplay **before** your changes, showing the bug/broken behavior
-- [ ] A 10-second video of gameplay **after** your changes, showing the bug fixed and the new features working
-- [ ] The Chat/LLM used page link, with the complete chat history
+- [x] A 10-second video of gameplay **before** your changes, showing the bug/broken behavior
+- [x] A 10-second video of gameplay **after** your changes, showing the bug fixed and the new features working
+- [x] The Chat/LLM used page link, with the complete chat history
+
+---
+
+## Submission Evidence
+
+- **Before Video**: [`videos/before.mp4`](videos/before.mp4)
+- **After Video**: [`videos/after.mp4`](videos/after.mp4)
+- **LLM / ChatGPT Conversation**: [https://chatgpt.com/share/6ac5c8b3-a9a8-83ee-b351-409839fe2b4b](https://chatgpt.com/share/6ac5c8b3-a9a8-83ee-b351-409839fe2b4b)
+
